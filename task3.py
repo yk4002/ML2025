@@ -48,9 +48,9 @@ with pm.Model() as model:
 if __name__ == "__main__":
     with model:
         idata = pm.sample(
-            draws=200,
-            tune=200,
-            chains=1,
+            draws=1000,
+            tune=1000,
+            chains=4,
             cores=-1,
             target_accept=0.9
         )

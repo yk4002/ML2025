@@ -8,7 +8,7 @@ from torch import nn
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 
 
-# Load the data
+# Load the dataaa
 file_name = "regression_insurance.csv"
 data = pd.read_csv(file_name)
 # Split into training and testing sets (80% / 20%)
