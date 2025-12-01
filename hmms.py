@@ -24,38 +24,37 @@ data = pd.read_csv(pymc.get_data("deaths_and_temps_england_wales.csv"))
 #USE QUANTILES
 #SOURCE:
 
-#discretise temperature
+#discretise temperature (values chosen based on clustering of temperature)
 temps_raw = data["temp"]
-
-plt.figure(figsize=(8,4))
-sns.histplot(temps_raw, bins=20, kde=True)
-plt.title("Distribution of Temperature")
-plt.xlabel("Temperature")
-plt.ylabel("Count")
-plt.show()
-#maybe in order to do this you should check the distribution...see the spread
 temps_d = []
+for t in temps_raw:
+    if t <= 3:
+        temps_d.append(0)
+    elif t <=7:
+        temps_d.append(1)
+    elif t <=12:
+        temps_d.append(2)  
+    elif t <=16:
+        temps_d.append(3)   
+    elif t > 16:
+        temps_d.append(4)           
 
-##look at this graph and decide
 
 
-
-# #discretise deaths
+# #discretise deaths -where 0,1,2 corresponds to low, medium, high
 deaths_raw = data.columns["Deaths"]
 death_quantiles = deaths_raw.quantile([0.33, 0.66]).values
 deaths_d = []
 for de in deaths_raw:
+    #low
     if de <= death_quantiles[0]:
         deaths_d.append(0)
+    #medium
     elif de <= death_quantiles[1]:
-        deaths_d.append(1)       
+        deaths_d.append(1)   
+    #high    
     else:
         deaths_d.append(2)
-
-        
-
-# deaths_possible_values = {"low", "medium", "high"} #again maybe split this based on
-# #then convert all death values to their discrete equivalents
 
 
 
@@ -68,14 +67,16 @@ for de in deaths_raw:
 # # to implement supervised learning so you will have to do it ‘by hand’. Call
 # # the HMM with parameters learned in this way: HMM1.
 
-# #what are the main paremeters lol. But yes use deaths as y and temps as x?
-# #split into trainign and testing set and maybe use some kind of training method? or is that ill advised
+# use both the hidden states(temperature) as well as the 
+#its basically supervised
 # def HMM1(temps, deaths):
-    startprob 
+    #hided
 
-    transmat 
+    # startprob = 
 
-    emission matrix
+    # transmat 
+
+    # emission matrix
 
 
     
@@ -90,6 +91,8 @@ for de in deaths_raw:
 
 # #probability of siwtching states
 # def HMM2(switch_prob, noise_level, startprob):
+
+#ie just use the observations (deaths) for this hmm
 
 #     #snippet from the lab as a possible "template"
 #     n_components = 2

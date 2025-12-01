@@ -15,6 +15,9 @@ from tqdm import tqdm
 mnist = fetch_openml('mnist_784', version=1, as_frame=False)
 X, y = mnist["data"], mnist["target"].astype(int)
 
+#split into training and test set for cross validation
+
+
 
 #block 2
 # Visualize sampled images and labels.
@@ -46,49 +49,7 @@ scaler = StandardScaler(with_std=False)
 X_centred = scaler.fit_transform(X)
 pca = PCA(n_components=n)
 X_PCA = pca.fit_transform(X_centred)
-
-
-#block 4
-#SOURCE: Scikit Silhouette Analysis for KMeans Clustering (and GMM) where it is used for one parameter - here we use it for 3!
-#use silhouette score to evaluate Kmeans. Maybe explore one more hyperparameter?
-hyperparams_k = {
-    "n_clusters": [10],
-    "max_iter": [300,400],
-    "n_init": [5, 10, 15, 20] #n_init specifies how many times the K-Means algorithm will run with different centroid seeds.
-}
-
-#progress bar setup 
-total_k_runs = (
-    len(hyperparams_k["n_clusters"]) *
-    len(hyperparams_k["max_iter"]) *
-    len(hyperparams_k["n_init"])
-)
-pbar = tqdm(total=total_k_runs, desc="KMeans search")
-
-
-#loop through all hyperparam combinatiosn and use silhouette score as the matrix to evaluate which one is the best
-best_score_k = -1
-best_params_k = None
-for n_clusters in hyperparams_k["n_clusters"]:
-    for max_iter in hyperparams_k["max_iter"]:
-        for n_init in hyperparams_k["n_init"]:
-            model = KMeans(n_clusters=n_clusters, max_iter=max_iter, n_init=n_init, random_state=42)
-            labels = model.fit_predict(X_PCA)
-            sil_sc = silhouette_score(X_PCA, labels)
-            if sil_sc > best_score_k:
-                best_score_k = sil_sc
-                best_params_k = {"n_clusters": n_clusters, "max_iter": max_iter, "n_init": n_init}
-            pbar.update(1)
-pbar.close()
-print("Best KMeans params:", best_params_k)
-
-#define the model with optimised paraneters
-kmeans = KMeans(n_clusters=best_params_k["n_clusters"], 
-                max_iter=best_params_k["max_iter"],
-                n_init=best_params_k["n_init"],
-                random_state=42)
-kmeans.fit(X_PCA)
-labels_k = kmeans.labels_
+print()
 
 
 
@@ -138,6 +99,53 @@ gmm.fit(X_PCA)
 labels_g = gmm.predict(X_PCA)
 
 
+#block 4
+#SOURCE: Scikit Silhouette Analysis for KMeans Clustering (and GMM) where it is used for one parameter - here we use it for 3!
+#use silhouette score to evaluate Kmeans. Maybe explore one more hyperparameter?
+hyperparams_k = {
+    "n_clusters": [10],
+    "max_iter": [300,400],
+    "n_init": [5, 10, 15, 20] #n_init specifies how many times the K-Means algorithm will run with different centroid seeds.
+}
+
+#progress bar setup 
+total_k_runs = (
+    len(hyperparams_k["n_clusters"]) *
+    len(hyperparams_k["max_iter"]) *
+    len(hyperparams_k["n_init"])
+)
+pbar = tqdm(total=total_k_runs, desc="KMeans search")
+
+
+#loop through all hyperparam combinatiosn and use silhouette score as the matrix to evaluate which one is the best
+best_score_k = -1
+best_params_k = None
+for n_clusters in hyperparams_k["n_clusters"]:
+    for max_iter in hyperparams_k["max_iter"]:
+        for n_init in hyperparams_k["n_init"]:
+            model = KMeans(n_clusters=n_clusters, max_iter=max_iter, n_init=n_init, random_state=42)
+            labels = model.fit_predict(X_PCA)
+            sil_sc = silhouette_score(X_PCA, labels)
+            if sil_sc > best_score_k:
+                best_score_k = sil_sc
+                best_params_k = {"n_clusters": n_clusters, "max_iter": max_iter, "n_init": n_init}
+            pbar.update(1)
+pbar.close()
+print("Best KMeans params:", best_params_k)
+
+#define the model with optimised paraneters
+kmeans = KMeans(n_clusters=best_params_k["n_clusters"], 
+                max_iter=best_params_k["max_iter"],
+                n_init=best_params_k["n_init"],
+                random_state=42)
+kmeans.fit(X_PCA)
+labels_k = kmeans.labels_
+
+
+
+
+
+
 
 #block 6
 # Evaluate clustering performance of both clustering methods
@@ -159,33 +167,32 @@ print("Silhouette GMM:", silhouette_score(X_PCA, labels_g))
 if best_score_k > best_score_g:
     print("K MEANS")
     labels = labels_k
-    title = "KMeans"
     K = best_params_k["n_clusters"]
 else:
     print("GMM")
     labels = labels_g
-    title = "GMM"
     K = best_params_g["n_components"]
 
 
-#NOT SURE I UNDErSTAND THIS
 #graphing the subplots
 fig, axes = plt.subplots(K, 5, figsize=(15, K*1.5))
 for cluster in range(K):
     #first find the indices where the labels equal the cluster in K?
     indices = np.where(labels == cluster)[0]
-    #then do random choicem accounting for when the  for when cluster has less than 5
+    #then do random choicem, accounting for when the  for when cluster has less than 5
     num_images = min(5, len(indices))
     chosen = np.random.choice(indices, num_images, replace=False)
 
-    
-    #reshape - 
+    #create the images 
     for n, index in enumerate(chosen):
         ax = axes[cluster, n]
         ax.imshow(X[index].reshape(28, 28), cmap="gray") #reshape it back to original dimensions
         ax.axis("off")
         ax.set_title(f"Img {index}", fontsize=8)
 
+if labels == labels_g:
+    title = "GMM"
+else: title = "Kmeans"
 plt.tight_layout()
 plt.title(f"Best clustering visualization – {title}")
 plt.show()

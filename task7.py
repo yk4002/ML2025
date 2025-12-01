@@ -47,15 +47,7 @@ X_test_PCA = task4.X_test_pca
 # validation to choose hyperparameters such as kernel type, C, and γ. 
 #have a look at what other hyperparams might be needed for SVM through equation? And their range of stuff
 hyperparams = {
-    "kernel": ['linear', 'rbf'],
-    "C": [0.1, 1, 10],
-    "gamma": ['scale', 0.01, 0.1]
-}
-
-
-#PURELY FOR TESTING PURPOSES
-hyperparams = {
-    "kernel": ['linear'],
+    "kernel": ['rbf', 'poly'], #which other one should we use
     "C": [0.1, 1, 10],
     "gamma": ['scale', 0.01, 0.1]
 }
@@ -66,7 +58,7 @@ grid = GridSearchCV(
     estimator= SVC(),  
     param_grid=hyperparams, 
     scoring="accuracy",
-    cv = 5, #might need to talk about this
+    cv = 3, #might need to talk about this
     n_jobs=-1,
     verbose=3,  
 )
@@ -86,15 +78,12 @@ print("Test accuracy:", test_accuracy)
 
 #visualise 5 misclassified images? 
 #check the examples find this code somwhere else and link the source please
-f = (15,6)
+f = (15, 6)
 y_pred_test = model.predict(X_test_PCA)
-misclass_indexes = np.where(y_pred_test != y_test)[0] #ie misclassified
+misclass_indexes = np.where(y_pred_test != y_test)[0]
 np.random.seed(42)
 chosen_images = np.random.choice(misclass_indexes, size=5, replace=False)
-class_names = [
-    'airplane','automobile','bird','cat','deer',
-    'dog','frog','horse','ship','truck'
-]
+class_names = ['airplane','automobile','bird','cat','deer','dog','frog','horse','ship','truck']
 
 fig, axes = plt.subplots(1, 5, figsize=f)
 for n, index in enumerate(chosen_images):
@@ -104,7 +93,7 @@ for n, index in enumerate(chosen_images):
     ax.axis("off")
     true_label = class_names[y_test[index]]
     pred_label = class_names[y_pred_test[index]]
-    ax.set_title(f"T: {true_label}\nP: {pred_label}", fontsize=10)
+    ax.set_title(f"Actual label: {true_label}\nPredicted label: {pred_label}", fontsize=10)
 
 plt.suptitle("Misclassified images of SVM classifier")
 plt.tight_layout()

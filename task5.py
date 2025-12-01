@@ -64,7 +64,7 @@ grid = GridSearchCV(
     estimator= DecisionTreeClassifier(random_state = 42),  
     param_grid=hyperparams, 
     scoring="accuracy",
-    cv = 2, #talk about this   
+    cv = 3, #talk about this   
     n_jobs=6,   
     verbose=3,                      
 )
@@ -92,15 +92,12 @@ print("Test accuracy:", test_accuracy)
 
 #visualise 5 misclassified images? 
 #SOURCE: https://www.cs.toronto.edu/~kriz/cifar.html.
-f = (15,6)
+f = (15, 6)
 y_pred_test = model.predict(X_test_PCA)
-misclass_indexes = np.where(y_pred_test != y_test)[0] #ie misclassified
+misclass_indexes = np.where(y_pred_test != y_test)[0]
 np.random.seed(42)
 chosen_images = np.random.choice(misclass_indexes, size=5, replace=False)
-class_names = [
-    'airplane','automobile','bird','cat','deer',
-    'dog','frog','horse','ship','truck'
-]
+class_names = ['airplane','automobile','bird','cat','deer','dog','frog','horse','ship','truck']
 
 fig, axes = plt.subplots(1, 5, figsize=f)
 for n, index in enumerate(chosen_images):
@@ -110,7 +107,7 @@ for n, index in enumerate(chosen_images):
     ax.axis("off")
     true_label = class_names[y_test[index]]
     pred_label = class_names[y_pred_test[index]]
-    ax.set_title(f"T: {true_label}\nP: {pred_label}", fontsize=10)
+    ax.set_title(f"Actual label: {true_label}\nPredicted label: {pred_label}", fontsize=10)
 
 plt.suptitle("Misclassified images of Decision Tree classifier")
 plt.tight_layout()
