@@ -70,15 +70,15 @@ grid = GridSearchCV(
 )
 #find the hyperparams which fit the data the best
 grid.fit(X_train_PCA, y_train)
-opt_hyperparams = grid.best_params_
-print(opt_hyperparams)
+optparams = grid.best_params_
+print(optparams)
 
 
 # Using the data after dimension reduction, train a single decision
 # tree classifier on the CIFAR–10 training set. 
-model = DecisionTreeClassifier(min_samples_leaf = opt_hyperparams["min_samples_leaf"], 
-                               max_depth=opt_hyperparams["max_depth"], 
-                               min_samples_split=opt_hyperparams["min_samples_split"],
+model = DecisionTreeClassifier(min_samples_leaf = optparams["min_samples_leaf"], 
+                               max_depth=optparams["max_depth"], 
+                               min_samples_split=optparams["min_samples_split"],
                                random_state=42)
 model.fit(X_train_PCA, y_train)
 

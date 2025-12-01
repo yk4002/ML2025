@@ -50,6 +50,8 @@ hyperparams = {
     "kernel": ['rbf', 'poly'], #which other one should we use
     "C": [0.1, 1, 10],
     "gamma": ['scale', 0.01, 0.1]
+    #add scale to this and then evaluate for the higher values of C if you have some time
+    #maybe C = 50, and scale = 3,4,5
 }
 
 
@@ -64,6 +66,7 @@ grid = GridSearchCV(
 )
 grid.fit(X_train_PCA, y_train)
 optparams = grid.best_params_
+print(optparams)
 
 
 # Train a Support Vector Machine (SVM) classifier. 

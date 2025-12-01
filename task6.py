@@ -61,15 +61,15 @@ grid = GridSearchCV(
 )
 
 grid.fit(X_train_PCA, y_train)
-opt_hyperparams = grid.best_params_
-print("Best hyperparameters:", opt_hyperparams)
+optparams = grid.best_params_
+print(optparams)
 
 # Train Random Forest with best hyperparameters
 model = RandomForestClassifier(
-    n_estimators=opt_hyperparams["n_estimators"],
-    max_depth=opt_hyperparams["max_depth"],
-    max_features=opt_hyperparams["max_features"],
-    min_samples_split=opt_hyperparams["min_samples_split"],
+    n_estimators=optparams["n_estimators"],
+    max_depth=optparams["max_depth"],
+    max_features=optparams["max_features"],
+    min_samples_split=optparams["min_samples_split"],
     random_state=42
 )
 model.fit(X_train_PCA, y_train)
