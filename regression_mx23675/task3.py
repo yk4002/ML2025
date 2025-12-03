@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 import pymc as pm
-import arviz as az
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 
 # Load the data
@@ -38,7 +37,7 @@ with pm.Model() as model:
     w0 = pm.Normal("w0", mu=0, sigma=20)
     w1 = pm.Normal("w1", mu=0, sigma=20, shape=X_train_p.shape[1])
 
-    #noise calculated
+    #noise assumed
     sigma = pm.Uniform("sigma", lower=0, upper=10)
     #regression defined
     y_est = w0 + pm.math.dot(X_train_p, w1)

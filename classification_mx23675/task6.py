@@ -45,9 +45,9 @@ X_test_PCA = task4.X_test_pca
 # Define hyperparameters for Random Forest
 hyperparams = {
     "n_estimators": [100, 200],
-    "max_depth": [10, 20],
+    "max_depth": [5,10],
     "max_features": ["sqrt", 0.5],  # fraction or sqrt of the features
-    "min_samples_split": [2, 5]
+    "min_samples_split": [10, 20]
 }
 
 # GridSearchCV for Random Forest

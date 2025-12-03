@@ -47,20 +47,25 @@ X_test_PCA = task4.X_test_pca
 # validation to choose hyperparameters such as kernel type, C, and γ. 
 #have a look at what other hyperparams might be needed for SVM through equation? And their range of stuff
 hyperparams = {
-    "kernel": ['rbf', 'poly'], 
-    "C": [0.1, 1, 5, 10],
-    "gamma": ['scale', 0.01, 0.1]
-    #add scale to this and then evaluate for the higher values of C if you have some time
-    #maybe C = 50, and scale = 3,4,5
+    "kernel": ["rbf"], 
+    "C": [0.1, 5],
+    "gamma": ["scale", 0.1],
+    # "degree": [2, 3]
 }
 
+# hyperparams = {
+#     "kernel": ["rbf"], #poly
+#     "C": [10],
+#     "gamma": ["scale"],
+#     # "degree": [2, 3]
+# }
 
 
 grid = GridSearchCV(
     estimator= SVC(),  
     param_grid=hyperparams, 
     scoring="accuracy",
-    cv = 2, #might need to talk about this
+    cv = 3, #might need to talk about this
     n_jobs=-1,
     verbose=3,  
 )

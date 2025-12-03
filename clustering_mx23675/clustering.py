@@ -27,17 +27,22 @@ for mnist_dig in range(classes):
         ax = axes[mnist_dig, i]
         ax.imshow(X[idx].reshape(28, 28), cmap="gray")
         ax.axis("off")
-plt.suptitle("Sampled MNIST images with class labels", fontsize=20)
+        # Label the first column of each row
+        if i == 0:
+            ax.set_ylabel(f"{mnist_dig}", fontsize=14, rotation=0, labelpad=40, va='center')
+            
+fig.suptitle("Sampled MNIST images sorted into class", fontsize=20, fontweight="bold")
+fig.savefig("mnist_samples.png", dpi=300)
 plt.show()
 
 
 # block 3
-n = 100
+n = 80
 scaler = StandardScaler(with_std=False)
 X_centred = scaler.fit_transform(X)
 pca = PCA(n_components=n)
 X_PCA = pca.fit_transform(X_centred)
-print("PCA completed, reduced to 100 features.\n")
+print("PCA completed, reduced to features.\n")
 
 
 # block 5
@@ -76,9 +81,9 @@ for n_comp in hyperparams_gmm["n_components"]:
                 sil = silhouette_score(X_val, labels_val)
                 fold_scores.append(sil)
 
-            avg_sil = np.mean(fold_scores)
-            if avg_sil > best_score_g:
-                best_score_g = avg_sil
+            sil_mean = np.mean(fold_scores)
+            if sil_mean > best_score_g:
+                best_score_g = sil_mean
                 best_params_g = {"n_components": n_comp,"covariance_type": cov,"n_init": n_init}
             pbar.update(1)
 pbar.close()
@@ -97,7 +102,7 @@ labels_g = gmm.predict(X_PCA)
 # block 4
 hyperparams_k = {
     "n_clusters": [10],
-    "max_iter": [300,400],
+    "max_iter": [100, 300],
     "n_init": [5, 10, 15, 20]
 }
 
@@ -129,9 +134,9 @@ for n_clusters in hyperparams_k["n_clusters"]:
                 sil = silhouette_score(X_val, labels_val)
                 fold_scores.append(sil)
 
-            avg_sil = np.mean(fold_scores)
-            if avg_sil > best_score_k:
-                best_score_k = avg_sil
+            sil_mean = np.mean(fold_scores)
+            if sil_mean > best_score_k:
+                best_score_k = sil_mean
                 best_params_k = {"n_clusters": n_clusters, "max_iter": max_iter, "n_init": n_init}
             pbar.update(1)
 pbar.close()
@@ -161,33 +166,42 @@ print("Silhouette GMM:", silhouette_score(X_PCA, labels_g))
 
 # block 7
 scaler = StandardScaler(with_std=False)
-X_centred_PCA = scaler.fit_transform(X_PCA)
+X_centred_2 = scaler.fit_transform(X_PCA)
 pca = PCA(n_components=2)
-X_PCA_2D = pca.fit_transform(X_centred_PCA)
+X_PCA_2D = pca.fit_transform(X_centred_2)
 print("Reduced to 2 features for graphing.\n")
 
 
 #block 9
+# --- 2D K-Means clustering ---
 K_k = best_params_k["n_clusters"]
 K_g = best_params_g["n_components"]
 
+fig, ax = plt.subplots(figsize=(8,6))
 for cluster in range(K_k):
     i = np.where(labels_k == cluster)[0]
     comps = X_PCA_2D[i]
-    plt.scatter(comps[:,0], comps[:,1], label = f"Cluster{cluster}")
+    ax.scatter(comps[:,0], comps[:,1])
 
-plt.scatter(kmeans.cluster_centers_[:, 0], kmeans.cluster_centers_[:, 1], s=50, c='red', marker='X')
-plt.legend()
-plt.title("2D K-Means clustering")
+ax.scatter(kmeans.cluster_centers_[:, 0], kmeans.cluster_centers_[:, 1], 
+           s=30, c='black', marker='X')
+
+ax.set_title("2D K-Means clustering", fontweight="bold")
+fig.tight_layout()
+fig.savefig("2d_Kmeans.png", dpi=300)
 plt.show()
 
+
+# --- 2D GMM clustering ---
+fig, ax = plt.subplots(figsize=(8,6))
 for cluster in range(K_g):
     i = np.where(labels_g == cluster)[0]
     comps = X_PCA_2D[i]
-    plt.scatter(comps[:,0], comps[:,1], label = f"Cluster{cluster}")
+    ax.scatter(comps[:,0], comps[:,1])
 
-plt.legend()
-plt.title("2D GMM clustering")
+ax.set_title("2D GMM clustering", fontweight="bold")
+fig.tight_layout()
+fig.savefig("2D_GMM.png", dpi=300)
 plt.show()
 
 
@@ -195,29 +209,31 @@ plt.show()
 if best_score_k > best_score_g:
     print("K MEANS")
     labels = labels_k
-    K = best_params_k["n_clusters"]
+    K = K_k
     model = "K-Means"
 else:
     print("GMM")
     labels = labels_g
-    K = best_params_g["n_components"]
+    K = K_g
     model = "GMM"
 print(f"{model} is the best performing model\n")
 
 
 #block 10
 fig, axes = plt.subplots(K, 5, figsize=(15, K*1.5))
+
 for cluster in range(K):
     indices = np.where(labels == cluster)[0]
     num_images = min(5, len(indices))
     chosen_images = np.random.choice(indices, num_images, replace=False)
     for n, index in enumerate(chosen_images):
         ax = axes[cluster, n]
-        ax.imshow(X[index].reshape(28, 28), cmap="gray")
-        ax.axis("off")
+        ax.imshow(X[index].reshape(28, 28), cmap="gray")  # axes-level
+        ax.axis("off")                                     # axes-level
 
-plt.tight_layout(rect=[0,0,1,0.95])
-plt.suptitle(f"Best clustering visualization – {model}", fontsize=16)
+fig.suptitle(f"Best clustering visualization – {model}", fontweight="bold")  # figure-level
+fig.tight_layout(rect=[0, 0, 1, 0.95])  # figure-level: leave space for suptitle
+fig.savefig("Clusted_MNIST.png", dpi=300)
 plt.show()
 
 
