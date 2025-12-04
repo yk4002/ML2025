@@ -47,18 +47,10 @@ X_test_PCA = task4.X_test_pca
 # validation to choose hyperparameters such as kernel type, C, and γ. 
 #have a look at what other hyperparams might be needed for SVM through equation? And their range of stuff
 hyperparams = {
-    "kernel": ["rbf"], 
-    "C": [0.1, 5],
+    "kernel": ["rbf", "poly"], 
+    "C": [0.1, 1, 5],
     "gamma": ["scale", 0.1],
-    # "degree": [2, 3]
 }
-
-# hyperparams = {
-#     "kernel": ["rbf"], #poly
-#     "C": [10],
-#     "gamma": ["scale"],
-#     # "degree": [2, 3]
-# }
 
 
 grid = GridSearchCV(
@@ -85,7 +77,6 @@ print("Train accuracy:", model.score(X_train_PCA, y_train))
 print("Test accuracy:", test_accuracy)
 
 #visualise 5 misclassified images? 
-#check the examples find this code somwhere else and link the source please
 f = (15, 6)
 y_pred_test = model.predict(X_test_PCA)
 misclass_indexes = np.where(y_pred_test != y_test)[0]

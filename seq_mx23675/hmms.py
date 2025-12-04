@@ -50,10 +50,10 @@ def HMM1(deaths_arr, temps_arr, n_states, n_obs):
     startprob = np.zeros(n_states)
     startprob[ts[0]] = 1.0  # only one sequence, so start is the first temp state
 
-    # Transition matrix: counts of moving from state i to state j
+    # prob of moving from states
     transmat = np.zeros((n_states, n_states))
 
-    # Emission matrix: counts of emitting observation k given state i
+    # emitting observation k given state i
     emission_matrix = np.zeros((n_states, n_obs))
 
     # Count transitions and emissions along the sequence
@@ -64,48 +64,57 @@ def HMM1(deaths_arr, temps_arr, n_states, n_obs):
     # Count emission for the last observation
     emission_matrix[ts[-1], ds[-1]] += 1
 
-    # Normalize rows to get probabilities, handle zero row sums safely
+    # Normalising to great prob
     transmat = np.divide(transmat, transmat.sum(axis=1, keepdims=True), where=transmat.sum(axis=1, keepdims=True)!=0)
     emission_matrix = np.divide(emission_matrix, emission_matrix.sum(axis=1, keepdims=True), where=emission_matrix.sum(axis=1, keepdims=True)!=0)
 
     return startprob, transmat, emission_matrix
 
 
-# HMM2: Unsupervised learning of HMM from deaths only (observations)
+# HMM2: HMM learned from only observations
+#source: 
 def HMM2(death_arr, n_states, iterations):
     deaths = np.array(death_arr).reshape(-1, 1)
     model = hmm.CategoricalHMM(n_components=n_states, n_iter=iterations, random_state=42)
-    model.fit(deaths)  # hmmlearn fits unsupervised by default
+    model.fit(deaths)
     return model
 
 
 # Parameters
-n_states = len(set(temps_d))  # number of temp states = 5
-n_obs = len(set(deaths_d))    # number of death categories = 3
+n_states = 4
+n_obs = 3
 iters = 500
 
-# Learn supervised parameters from temperature and deaths sequences (put this into one function?)
+# Learn supervised parameters from discretised seuqneces, then manually set learned params
 startprob, transmat, emission_matrix = HMM1(deaths_d, temps_d, n_states, n_obs)
-# Create an HMM instance and manually set the learned parameters CLARIFY THIS
 model1 = hmm.CategoricalHMM(n_components=n_states, init_params="")
 model1.startprob_ = startprob
 model1.transmat_ = transmat
 model1.emissionprob_ = emission_matrix
-
 # Sample from the supervised HMM (HMM1)
 samples_hmm1, _ = model1.sample(len(deaths_d))
 
-# Learn unsupervised HMM from deaths only (HMM2)
-model2 = HMM2(deaths_d, n_states, iters)
 
+# Learn HMM2 from deaths
+model2 = HMM2(deaths_d, n_states, iters)
 # Sample from the unsupervised HMM (HMM2)
 samples_hmm2, _ = model2.sample(len(deaths_d))
 
 
+
+
+#plot other random stuff
+
 # Plot actual deaths and samples from both HMMs for comparison
 plt.figure(figsize=(15,5))
 
-#use maybe bar charts instead as a simple visualisation
+
+#use maybe 3 bar charts in one figure as a simple visualisation
+plt.bar()
+
+#then maybe some kind of matching matrix (ie which discrete values match the most? or the mean squared error is closest to 0?
+#another graph type would be nice but discretised values are better
+
 plt.plot(deaths_d, label="Actual Deaths (discretised)", alpha=0.7)
 plt.plot(samples_hmm1.flatten(), label="HMM1 Sampled Deaths (supervised)", alpha=0.7)
 plt.plot(samples_hmm2.flatten(), label="HMM2 Sampled Deaths (unsupervised)", alpha=0.7)
